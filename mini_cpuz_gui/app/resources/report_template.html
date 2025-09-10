@@ -1,0 +1,141 @@
+﻿<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>mini-cpuz Raporu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a; --fg: #e2e8f0; --muted: #94a3b8; --card: #111827;
+      --border: #334155; --accent: #2563eb; --thead: #0b1730; --thead-fg: #93c5fd;
+    }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; background: var(--bg); color: var(--fg); }
+    h1, h2, h3 { margin: 0.4rem 0; }
+    .section { margin-top: 1.5rem; padding: 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
+    th, td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; }
+    th { background: var(--thead); color: var(--thead-fg); }
+    small { color: var(--muted); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; background: #0b1220; color: var(--fg); border: 1px solid var(--border); margin-right: 6px; }
+  </style>
+  </head>
+<body>
+  <h1>mini-cpuz Raporu</h1>
+  <small>Toplanma: {{ data.collected_at }}</small>
+
+  <div class="section">
+    <h2>CPU</h2>
+    <table>
+      <tbody>
+        {% for k, v in data.cpu.items() %}
+        <tr><th>{{ k }}</th><td class="mono">{{ v }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>RAM</h2>
+    <table>
+      <tbody>
+        <tr><th>Toplam</th><td class="mono">{{ data.memory.total }}</td></tr>
+        <tr><th>Kullanım %</th><td class="mono">{{ data.memory.percent }}</td></tr>
+        <tr><th>Swap</th><td class="mono">{{ data.memory.swap_used }}/{{ data.memory.swap_total }} ({{ data.memory.swap_percent }}%)</td></tr>
+      </tbody>
+    </table>
+    {% if data.memory.modules %}
+      <h3>ModÃ¼ller</h3>
+      <table>
+        <thead><tr>
+          {% for col in data.memory.modules[0].keys() %}<th>{{ col }}</th>{% endfor %}
+        </tr></thead>
+        <tbody>
+          {% for row in data.memory.modules %}
+            <tr>{% for col, val in row.items() %}<td class="mono">{{ val }}</td>{% endfor %}</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+    {% if data.memory.spd %}
+      <h3>SPD (Zamanlamalar)</h3>
+      <table>
+        <thead><tr>
+          {% for col in data.memory.spd[0].keys() %}<th>{{ col }}</th>{% endfor %}
+        </tr></thead>
+        <tbody>
+          {% for row in data.memory.spd %}
+            <tr>{% for col, val in row.items() %}<td class="mono">{{ val }}</td>{% endfor %}</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <small>Not: SPD verisi Libre/OpenHardwareMonitor veya decode-dimms Ã§Ä±ktÄ±sÄ±ndan elde edilir.</small>
+    {% endif %}
+  </div>
+
+  <div class="section">
+    <h2>GPU</h2>
+    {% if data.gpus %}
+    <table>
+      <thead><tr>
+        {% for col in data.gpus[0].keys() %}<th>{{ col }}</th>{% endfor %}
+      </tr></thead>
+      <tbody>
+        {% for row in data.gpus %}
+        <tr>{% for col, val in row.items() %}<td class="mono">{{ val }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>GPU bilgisi bulunamadı±.</p>
+    {% endif %}
+  </div>
+
+  <div class="section">
+    <h2>Anakart / BIOS</h2>
+    <pre class="mono">{{ data.motherboard_bios | tojson(indent=2) }}</pre>
+  </div>
+
+  <div class="section">
+    <h2>Ä°ÅŸletim Sistemi</h2>
+    <table>
+      <tbody>
+        {% for k, v in data.os.items() %}
+        <tr><th>{{ k }}</th><td class="mono">{{ v }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</html>
+
+
+  {% if data.network %}
+  <div class="section">
+    <h2>Ağ</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Arayüz</th><th>Durum</th><th>MAC</th><th>IPv4</th><th>IPv6</th><th>Hız (Mbps)</th><th>MTU</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in data.network %}
+        <tr>
+          <td>{{ it.name }}</td>
+          <td>{{ 'up' if it.is_up else 'down' }}</td>
+          <td class="mono">{{ it.mac }}</td>
+          <td class="mono">{{ it.ipv4 | join(', ') if it.ipv4 }}</td>
+          <td class="mono">{{ it.ipv6 | join(', ') if it.ipv6 }}</td>
+          <td>{{ it.speed_mbps }}</td>
+          <td>{{ it.mtu }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+</body>
+</html>
+
