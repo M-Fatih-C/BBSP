@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <title>MiniCPUZ Raporu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; background:#0e1116; color:#e5e7eb; }
+    h1, h2 { margin: 0.2rem 0; }
+    .section { margin-top: 1.5rem; }
+    table { border-collapse: collapse; width: 100%; margin-top: 0.5rem; }
+    th, td { border: 1px solid #1f2937; padding: 6px 8px; text-align: left; }
+    th { background: #111827; }
+    small { color: #9ca3af; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  </style>
+</head>
+<body>
+  <h1>MiniCPUZ Raporu</h1>
+  <small>Toplanma: {{ data.collected_at }}</small>
+
+  <div class="section">
+    <h2>CPU</h2>
+    <table>
+      <tbody>
+        {% for k, v in data.cpu.items() %}
+        <tr><th>{{ k }}</th><td class="mono">{{ v }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>RAM</h2>
+    <table>
+      <tbody>
+        <tr><th>Toplam</th><td class="mono">{{ data.memory.total }}</td></tr>
+        <tr><th>Kullanım %</th><td class="mono">{{ data.memory.percent }}</td></tr>
+        <tr><th>Swap</th><td class="mono">{{ data.memory.swap_used }}/{{ data.memory.swap_total }} ({{ data.memory.swap_percent }}%)</td></tr>
+      </tbody>
+    </table>
+    {% if data.memory.modules %}
+      <h3>Modüller</h3>
+      <table>
+        <thead><tr>
+          {% for col in data.memory.modules[0].keys() %}<th>{{ col }}</th>{% endfor %}
+        </tr></thead>
+        <tbody>
+          {% for row in data.memory.modules %}
+            <tr>{% for col, val in row.items() %}<td class="mono">{{ val }}</td>{% endfor %}</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+    {% if data.memory.spd %}
+      <h3>SPD (Zamanlamalar)</h3>
+      <table>
+        <thead><tr>
+          {% for col in data.memory.spd[0].keys() %}<th>{{ col }}</th>{% endfor %}
+        </tr></thead>
+        <tbody>
+          {% for row in data.memory.spd %}
+            <tr>{% for col, val in row.items() %}<td class="mono">{{ val }}</td>{% endfor %}</tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <small>Not: SPD verisi Libre/OpenHardwareMonitor veya decode-dimms çıktısından elde edilir.</small>
+    {% endif %}
+  </div>
+
+  <div class="section">
+    <h2>GPU</h2>
+    {% if data.gpus %}
+    <table>
+      <thead><tr>
+        {% for col in data.gpus[0].keys() %}<th>{{ col }}</th>{% endfor %}
+      </tr></thead>
+      <tbody>
+        {% for row in data.gpus %}
+        <tr>{% for col, val in row.items() %}<td class="mono">{{ val }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>GPU bilgisi bulunamadı.</p>
+    {% endif %}
+  </div>
+
+  <div class="section">
+    <h2>Ağ</h2>
+    {% if data.network %}
+    <table>
+      <thead><tr>
+        {% for col in data.network[0].keys() %}<th>{{ col }}</th>{% endfor %}
+      </tr></thead>
+      <tbody>
+        {% for row in data.network %}
+        <tr>{% for col, val in row.items() %}<td class="mono">{{ val }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>Ağ bilgisi bulunamadı.</p>
+    {% endif %}
+  </div>
+
+  <div class="section">
+    <h2>Anakart / BIOS</h2>
+    <pre class="mono">{{ data.motherboard_bios | tojson(indent=2) }}</pre>
+  </div>
+
+  <div class="section">
+    <h2>İşletim Sistemi</h2>
+    <table>
+      <tbody>
+        {% for k, v in data.os.items() %}
+        <tr><th>{{ k }}</th><td class="mono">{{ v }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
